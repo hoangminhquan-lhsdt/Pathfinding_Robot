@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
 from Map import Map
+import math
 
 class State:
-    def __init__(self, position, g):
+    def __init__(self, position, goal, g=0):
         # init unopened state
         self.checked = False
 
@@ -11,17 +12,8 @@ class State:
 
         # heuristic values
         self.g = g
-        self.h = 0
-        self.f = 0
-
-    def calculateF(self, goal):
-        self.calculateH(goal)
-        self.f = self.h + self.g
-        return self.f
-
-    def calculateH(self, goal):
-        self.h = abs(self.position[0] - goal[0]) + abs(self.position[1] - goal[1])
-        return self.h
+        self.h = abs(self.position[0] - goal[0]) + abs(self.position[1] + goal[1])
+        self.f = self.g + self.h
 
     def atDestination(self, goal):
         if self.position != goal:
@@ -29,19 +21,25 @@ class State:
         return True
 
 
-def AStarSearch(Map):
+def AStar_Search(Map):
     # starting position state
-    positionState = State(Map.start, 0)
+    positionState = State(Map.start, Map.goal, 0)
 
     # list of opened and closed points
     openList = []
     closedList = []
 
     # add start to open list
-    
-    while not state.atDestination:
-        pass
-    
+    openList.append(positionState)
+
+    while not positionState.atDestination:
+        # find state with lowest f value
+        index = 0
+        for i in range(openList.__len__()):
+            Fmin = math.inf
+            if Fmin > openList[i].f:
+                Fmin = openList[i].f
+                index = i
 
 
 if __name__ == '__main__':
