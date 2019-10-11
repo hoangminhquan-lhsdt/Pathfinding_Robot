@@ -27,4 +27,8 @@ class Map:
 	def isBlocked(self, x, y):
 		if (x,y) in self.obstacleList:
 			return True
+		if x < 0 or x > len(self._map):
+			return True
+		if y < 0 or y > len(self._map[0]):
+			return True
 		return False
