@@ -41,6 +41,15 @@ def AStar_Search(Map):
                 Fmin = openList[i].f
                 index = i
 
+def Greedy_Search(Map):
+	positionState = State(Map.start,Map.goal,0)
+	
+
+	while not positionState.atDestination:
+		openList = [State]
+
+
+
 
 if __name__ == '__main__':
     Map1 = Map(30, 20, (18, 1), (1, 28))
