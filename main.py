@@ -16,15 +16,8 @@ class State:
         self.h = abs(self.position[0] - goal[0]) + abs(self.position[1] + goal[1])
         self.f = self.g + self.h
 
-    def atDestination(self, goal):
-        if self.position != goal:
-            return False
-        return True
-
     def __eq__(self, other):
-        if self.position == other.position:
-            return True
-        return False
+        return (self.position == other.position)
 
 
 def insert_node(open_list, node):
@@ -32,21 +25,21 @@ def insert_node(open_list, node):
         open_list.append(node)
     else:
         open_list.append(node)
-        i=1
-        while i < len(open_list) and open_list[i].f < open_list[i-1].f:
+        i= len(open_list) - 1
+        while i > 0 and open_list[i].f < open_list[i-1].f:
             temp=open_list[i]
             open_list[i]=open_list[i-1]
             open_list[i-1]=temp
-            i+=1
+            i -= 1
 
 def AStar_Search(Map):
-    # starting position state
+    # Start node, Goal node
     start_state = State(Map.goal, None, Map.start, 0)
+    goal_state = State(Map.goal, None, Map.goal, 0)
 
     # list of opened and closed points
     open_list = []
     closed_list = []
-    path = []
     
     # add start to open list
     open_list.append(start_state)
@@ -56,25 +49,19 @@ def AStar_Search(Map):
         current_node = open_list[0]
         open_list.pop(0)
         closed_list.append(current_node)
-        
-        # current_index = 0
-        # for index, item in enumerate(open_list):
-        #     if item.f < current_node.f:
-        #         current_node = item
-        #         current_index = index
-
-        # #Pop current node out of open list, add to closed list
-        # open_list.pop(current_index)
-        # closed_list.append(current_node)
 
         #Check if current node is goal
-        if current_node.atDestination(Map.goal):
-            #Back track
+        if current_node == goal_state:
+            #Back track to get path
             parent = current_node.parent
-            while parent.parent is not None:
-                path.append(parent.position)
-                parent = parent.parent
-            return path[::-1]                       #return reversed path
+            if parent is None:
+                return []
+            else:
+                path = []
+                while parent != start_state:
+                    path.append(parent.position)
+                    parent = parent.parent
+                return path[::-1]
         
         #Check if is neighbors of current node, append it to a list
         neighbors_index = [(1, 0), (0, 1), (-1, 0), (0, -1)]
@@ -98,33 +85,30 @@ def AStar_Search(Map):
                 if child.__eq__(i):
                     check = 0
                     continue
-            
             #Check if child is in open list
             for index, item in enumerate(open_list):
                 if item.__eq__(child):
+                    check = 0
                     if child.g < item.g:                #child is optimal
-                        check = 0
                         open_list.pop(index)
                         insert_node(open_list, child)
                         continue
                     else:
-                        check = 0
                         continue
             if check:
                 insert_node(open_list, child)
-                        
-    #Can not find any path
-    return path
+    
+    #can not find any path
+    return []
 
 
 
 class Node_Dijkstra:
-    def __init__(self, parent = None, position = (int, int), distance = 100, state = False):
+    def __init__(self, parent = None, position = (int, int), distance = 1000):
         #
-        self.checked = state
         self.parent = parent
         self.position = position
-        self.distance = distance
+        self.f = distance
 
     def __eq__(self, other):
         return (self.position == other.position)
@@ -139,38 +123,38 @@ def Dijkstra_Search(Map):
     explored_list = []
 
     #Set all node to unexplored
-    unexplored_list.append(start_node)
     for i in range (len(Map._map)):
         for j in range (len(Map._map[i])):
             i_node = Node_Dijkstra(None, (i, j))
-            if i_node.__eq__(start_node):
+            if Map.isBlocked(i, j):
                 continue
-            unexplored_list.append(i_node)
+            insert_node(unexplored_list, i_node)
+    for index, item in enumerate(unexplored_list):
+        if item == start_node:
+            unexplored_list.pop(index)
+            break
+    insert_node(unexplored_list, start_node)
 
-    path = []
     #Loop until the unexplored set is empty
     while len(unexplored_list) > 0:
-        #Look for the least distance
         current_node = unexplored_list[0]
-        current_index = 0
-        for index, item in enumerate(unexplored_list):
-            if item.distance < current_node.distance:
-                current_node = item
-                current_index = index
     
         #Remove current node from the unexplored set
-        current_node.checked = True
-        unexplored_list.pop(current_index)
+        unexplored_list.pop(0)
         explored_list.append(current_node)
 
         #Check if current Node is Goal
-        if current_node.__eq__(goal_node):
+        if current_node == goal_node:
             #Back track to get path
             parent = current_node.parent
-            while parent.parent is not None:
-                path.append(parent.position)
-                parent = parent.parent
-            return path[::-1]                       #return reversed path
+            if parent is None:
+                return []
+            else:
+                path = []
+                while parent != start_node:
+                    path.append(parent.position)
+                    parent = parent.parent
+                return path[::-1]
 
         #Check if neighbors of current node, append it to a list
         neighbors_index = [(1, 0), (0, 1), (-1, 0), (0, -1)]
@@ -183,7 +167,7 @@ def Dijkstra_Search(Map):
             #Check walkable
             if Map.isBlocked(pos[0], pos[1]):
                 continue
-            dist = current_node.distance + 1
+            dist = current_node.f + 1
             new_node = Node_Dijkstra(current_node, pos, dist)
             neighbors.append(new_node)
 
@@ -191,22 +175,40 @@ def Dijkstra_Search(Map):
         for child in neighbors:
             #Check if is in explored list
             for i in explored_list:
-                if child.__eq__(i):
+                if child == i:
                     continue
             
             #Check if distance is better
             for index, item in enumerate(unexplored_list):
-                if item.__eq__(child):
-                    if item.distance > child.distance:
+                if item == child:
+                    if item.f > child.f:
                         unexplored_list.pop(index)
-                        unexplored_list.append(child)
+                        insert_node(unexplored_list, child)
     
     #Can not find any path
-    return path
+    return []
 
 if __name__ == '__main__':
+    # Map1 = Map(10, 20, (0, 0), (9, 19))
     Map1 = Map(5, 5, (0, 0), (4, 4))
-    Map1.addObstacle([(4,0),(3,1),(2,2),(1,3),(0,4)])
+    Map1.addObstacle([(4, 0),(3, 1),(2, 2),(1, 3), (0, 4)])
+    # Map1.addObstacle([(0, 1),(1, 1),(2, 1),(9, 1),(4, 1), (5, 1),(6, 1),(7, 1),(8, 1)])
+    # Map1.addObstacle([(2, 2),(2, 3),(2, 4),(2, 5)])
+    # Map1.addObstacle([(1, 5),(2, 5),(4, 5),(5, 5),(6, 5),(7, 5),(8, 5), (3, 5)])
+    # Map1.addObstacle([(1, 7),(2, 7),(3, 7),(4, 7),(5, 7),(1,8),(1,9),(2, 9),(3, 9),(4, 9),(5, 9), (5, 8)])
+    # for i in range(1,8):
+    #     if i % 2 == 0:
+    #         for j in range(0,8):
+    #             Map1.addObstacle([(j,i*2)])
+    #     else:
+    #         for j in range(1,9):
+    #             Map1.addObstacle([(j,i*2)])
+    # for i in range (9,15):
+    #     for j in range(4,10):
+    #         if i+j>18:
+    #             Map1.addObstacle([(j,i)])
+    # Map1.addObstacle([(9, 4)])
+
     path = []
     path = Dijkstra_Search(Map1)
     Map1.addPath(path)
