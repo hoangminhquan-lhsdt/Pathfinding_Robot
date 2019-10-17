@@ -89,7 +89,7 @@ def AStar_Search(Map):
             for index, item in enumerate(open_list):
                 if item.__eq__(child):
                     check = 0
-                    if child.g < item.g:                #child is optimal
+                    if child.f < item.f:                #child is optimal
                         open_list.pop(index)
                         insert_node(open_list, child)
                         continue
@@ -97,11 +97,45 @@ def AStar_Search(Map):
                         continue
             if check:
                 insert_node(open_list, child)
-    
     #can not find any path
     return []
 
+def Greedy_BFS_Recursive(checked_List,start_node,current_node, goal_node, Map):
+    #Check if current Node is Goal
+    if Map.isBlocked(current_node.position[0],current_node.position[1] ):
+        return []
+    elif current_node == goal_node:
+        parent = current_node.parent
+        path = []
+        while parent != start_node:
+            path.append(parent.position)
+            parent = parent.parent
+        return path[::-1]
+    else:
+        checked_List.append(current_node)
+        #Check if is neighbors of current node, append it to a list
+        neighbors_index = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+        neighbors = []
+        for i in neighbors_index:
+            pos = (current_node.position[0] + i[0], current_node.position[1] + i[1])
+            #Check out of Map
+            if pos[0] < 0 or pos[0] > (len(Map._map) - 1) or pos[1] < 0 or pos[1] > (len(Map._map[0]) - 1):
+                continue
+            new_node = State(Map.goal, current_node, pos, 0)
+            if new_node not in checked_List:
+                insert_node(neighbors, new_node)
+        #Check neighbor list
+        for i in neighbors:
+                path=Greedy_BFS_Recursive(checked_List,start_node, i, goal_node, Map)
+                if path!=[]:
+                    return path
+        return []
 
+def Greedy_BFS_Search(Map):
+    checked_List = []
+    start_state = State(Map.goal, None, Map.start, 0)
+    goal_state = State(Map.goal, None, Map.goal, 0)
+    return Greedy_BFS_Recursive(checked_List,start_state,start_state,goal_state,Map)     
 
 class Node_Dijkstra:
     def __init__(self, parent = None, position = (int, int), distance = 1000):
@@ -191,26 +225,12 @@ def Dijkstra_Search(Map):
 if __name__ == '__main__':
     # Map1 = Map(10, 20, (0, 0), (9, 19))
     Map1 = Map(5, 5, (0, 0), (4, 4))
-    Map1.addObstacle([(4, 0),(3, 1),(2, 2),(1, 3), (0, 4)])
-    # Map1.addObstacle([(0, 1),(1, 1),(2, 1),(9, 1),(4, 1), (5, 1),(6, 1),(7, 1),(8, 1)])
-    # Map1.addObstacle([(2, 2),(2, 3),(2, 4),(2, 5)])
-    # Map1.addObstacle([(1, 5),(2, 5),(4, 5),(5, 5),(6, 5),(7, 5),(8, 5), (3, 5)])
-    # Map1.addObstacle([(1, 7),(2, 7),(3, 7),(4, 7),(5, 7),(1,8),(1,9),(2, 9),(3, 9),(4, 9),(5, 9), (5, 8)])
-    # for i in range(1,8):
-    #     if i % 2 == 0:
-    #         for j in range(0,8):
-    #             Map1.addObstacle([(j,i*2)])
-    #     else:
-    #         for j in range(1,9):
-    #             Map1.addObstacle([(j,i*2)])
-    # for i in range (9,15):
-    #     for j in range(4,10):
-    #         if i+j>18:
-    #             Map1.addObstacle([(j,i)])
-    # Map1.addObstacle([(9, 4)])
-
+    #Map1.addObstacle([(3,9)])
+    for i in range(0,5):
+        Map1.addObstacle([(i,4-i)])
+    #Map1.addObstacle([(4,0)])
     path = []
-    path = Dijkstra_Search(Map1)
+    path = Greedy_BFS_Search(Map1)
     Map1.addPath(path)
     plt.imshow(Map1._map)
     plt.show()
