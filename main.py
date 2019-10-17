@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import time
 from Map import Map
 import math
 
@@ -32,10 +33,10 @@ def insert_node(open_list, node):
             open_list[i-1]=temp
             i -= 1
 
-def AStar_Search(Map):
+def AStar_Search(Start, Goal, Map):
     # Start node, Goal node
-    start_state = State(Map.goal, None, Map.start, 0)
-    goal_state = State(Map.goal, None, Map.goal, 0)
+    start_state = State(Goal, None, Start, 0)
+    goal_state = State(Goal, None, Goal, 0)
 
     # list of opened and closed points
     open_list = []
@@ -58,10 +59,11 @@ def AStar_Search(Map):
                 return []
             else:
                 path = []
+                path.append(goal_state.position)
                 while parent != start_state:
                     path.append(parent.position)
                     parent = parent.parent
-                return path[::-1]
+                return path[len(path) - 1]
         
         #Check if is neighbors of current node, append it to a list
         neighbors_index = [(1, 0), (0, 1), (-1, 0), (0, -1)]
@@ -110,7 +112,7 @@ def Greedy_BFS_Recursive(checked_List,start_node,current_node, goal_node, Map):
         while parent != start_node:
             path.append(parent.position)
             parent = parent.parent
-        return path[::-1]
+        return path[len(path) - 1]
     else:
         checked_List.append(current_node)
         #Check if is neighbors of current node, append it to a list
@@ -126,16 +128,16 @@ def Greedy_BFS_Recursive(checked_List,start_node,current_node, goal_node, Map):
                 insert_node(neighbors, new_node)
         #Check neighbor list
         for i in neighbors:
-                path=Greedy_BFS_Recursive(checked_List,start_node, i, goal_node, Map)
+                path = Greedy_BFS_Recursive(checked_List,start_node, i, goal_node, Map)
                 if path!=[]:
                     return path
         return []
 
-def Greedy_BFS_Search(Map):
+def Greedy_BFS_Search(Start, Goal, Map):
     checked_List = []
-    start_state = State(Map.goal, None, Map.start, 0)
-    goal_state = State(Map.goal, None, Map.goal, 0)
-    return Greedy_BFS_Recursive(checked_List,start_state,start_state,goal_state,Map)     
+    start_state = State(Goal, None, Start, 0)
+    goal_state = State(Goal, None, Goal, 0)
+    return Greedy_BFS_Recursive(checked_List, start_state, start_state, goal_state, Map)     
 
 class Node_Dijkstra:
     def __init__(self, parent = None, position = (int, int), distance = 1000):
@@ -147,10 +149,10 @@ class Node_Dijkstra:
     def __eq__(self, other):
         return (self.position == other.position)
 
-def Dijkstra_Search(Map):
+def Dijkstra_Search(Start, Goal, Map):
     #Create Start and Goal Node
-    start_node = Node_Dijkstra(None, Map.start, 0)
-    goal_node = Node_Dijkstra(None, Map.goal)
+    start_node = Node_Dijkstra(None, Start, 0)
+    goal_node = Node_Dijkstra(None, Goal)
 
     #Create a List of unexplored node
     unexplored_list = []
@@ -185,10 +187,11 @@ def Dijkstra_Search(Map):
                 return []
             else:
                 path = []
+                path.append(goal_node.position)
                 while parent != start_node:
                     path.append(parent.position)
                     parent = parent.parent
-                return path[::-1]
+                return path[len(path) - 1]
 
         #Check if neighbors of current node, append it to a list
         neighbors_index = [(1, 0), (0, 1), (-1, 0), (0, -1)]
@@ -226,11 +229,23 @@ if __name__ == '__main__':
     # Map1 = Map(10, 20, (0, 0), (9, 19))
     Map1 = Map(5, 5, (0, 0), (4, 4))
     #Map1.addObstacle([(3,9)])
-    for i in range(0,5):
+    for i in range(0,4):
         Map1.addObstacle([(i,4-i)])
     #Map1.addObstacle([(4,0)])
-    path = []
-    path = Greedy_BFS_Search(Map1)
-    Map1.addPath(path)
-    plt.imshow(Map1._map)
-    plt.show()
+    path = AStar_Search(Map1.start, Map1.goal, Map1)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    fig.show()
+    x, y = [], []
+    while True:
+        if path != []:
+            Map1.addPath([path])
+            plt.imshow(Map1._map)
+            fig.canvas.draw()
+            time.sleep(0.5)
+            i += 1
+            ax.clear()
+            path = AStar_Search(path, Map1.goal, Map1)
+        else:
+            break
