@@ -3,46 +3,108 @@ from Map import Map
 import math
 
 class State:
-    def __init__(self, position, goal, g=0):
-        # init unopened state
-        self.checked = False
+	def __init__(self, position: (int, int), goal: (int, int), g=0):
+		# init unopened state
+		self.checked = False
 
-        # current coordinates
-        self.position = position
+		# current coordinates
+		self.position = position
 
-        # heuristic values
-        self.g = g
-        self.h = abs(self.position[0] - goal[0]) + abs(self.position[1] + goal[1])
-        self.f = self.g + self.h
+		# parent state
+		self.parent = None
 
-    def atDestination(self, goal):
-        if self.position != goal:
-            return False
-        return True
+		# cost
+		self.g = g
+		# manhattan distance
+		self.h = abs(self.position[0] - goal[0]) + abs(self.position[1] + goal[1])
+		# heuristic value
+		self.f = self.g + self.h
 
+	def atDestination(self, goal: (int, int)):
+		if self.position != goal:
+			return False
+		return True
+'''
+def getChildren(pos: (int, int), Map: Map, parentG):
+	return [
+		State((pos[0]-1,pos[1]), Map.goal, parentG + 1),
+		State((pos[0]+1,pos[1]), Map.goal, parentG + 1),
+		State((pos[0],pos[1]-1), Map.goal, parentG + 1),
+		State((pos[0],pos[1]+1), Map.goal, parentG + 1)
+	]
+'''
+def getChildren(pos: (int, int), Map: Map, parentG):
+	result = []
+	if pos[0] > 0 and pos[0] < Map._map.__len__()-1:
+		result.append(State((pos[0]-1,pos[1]), Map.goal, 0))
+		result.append(State((pos[0]+1,pos[1]), Map.goal, 0))
+	elif pos[0] == 0:
+		result.append(State((pos[0]+1,pos[1]), Map.goal, 0))
+	elif pos[0] == Map._map.__len__()-1:
+		result.append(State((pos[0]-1,pos[1]), Map.goal, 0))
 
-def AStar_Search(Map):
-    # starting position state
-    positionState = State(Map.start, Map.goal, 0)
+	if pos[1] > 0 and pos[1] < Map._map[0].__len__()-1:
+		result.append(State((pos[0],pos[1]-1), Map.goal, 0))
+		result.append(State((pos[0],pos[1]+1), Map.goal, 0))
+	elif pos[1] == 0:
+		result.append(State((pos[0],pos[1]+1), Map.goal, 0))
+	elif pos[1] == Map._map[0].__len__()-1:
+		result.append(State((pos[0],pos[1]-1), Map.goal, 0))
 
-    # list of opened and closed points
-    openList = []
-    closedList = []
+	return result
+'''
+def AStar_Search(Map: Map):
+	# opened and closed points
+	openList = []
+	closedList = []
 
-    # add start to open list
-    openList.append(positionState)
+	# init starting point
+	currentPoint = State(Map.start, Map.goal, 0)
 
-    while not positionState.atDestination:
-        # find state with lowest f value
-        index = 0
-        for i in range(openList.__len__()):
-            Fmin = math.inf
-            if Fmin > openList[i].f:
-                Fmin = openList[i].f
-                index = i
+	# add starting point
+	openList.append(currentPoint)
+
+	while openList.__len__():
+		currentPoint = min(openList, key=lambda p: p.f)
+
+		if currentPoint.position == Map.goal:
+			path = []
+			while currentPoint.parent:
+				path.append(currentPoint)
+				currentPoint = currentPoint.parent
+			path.append(currentPoint)
+			return path[::-1]
+		
+		# remove point from open list
+		openList.remove(currentPoint)
+		closedList.append(currentPoint)
+
+		for newPoint in getChildren(currentPoint.position, Map, currentPoint.g):
+			if newPoint in closedList:
+				continue
+			
+'''
+def BFS(Maps: Map):
+	queue = []
+	queue.append(State(Maps.start, Maps.goal, 0))
+	while queue.__len__() > 0:
+		currentState = queue.pop()
+		print(currentState.position)
+		currentState.checked = True
+		for neighbor in getChildren(currentState.position, Maps, 0):
+			neighbor.parent = currentState
+			if neighbor == State(Maps.goal, Maps.goal, 0):
+				return neighbor
+			if neighbor.checked:
+				continue
+			queue.append(neighbor)
+			neighbor.checked = True
 
 
 if __name__ == '__main__':
-    Map1 = Map(30, 20, (18, 1), (1, 28))
-    plt.imshow(Map1._map)
-    plt.show()
+	start = (18,5)
+	Map1 = Map(20, 30, start, (1, 18))
+	print(BFS(Map1))
+	# plt.imshow(Map1._map)
+	# plt.axis([0,29,0,19])
+	# plt.show()

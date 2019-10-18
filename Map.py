@@ -1,7 +1,7 @@
 class Map:
-	def __init__(self, row, col, start=(19,0), goal=(0,29)):
+	def __init__(self, row, col, start=(29,0), goal=(0,19)):
 		# create 2d array
-		self._map = [[0 for x in range(row)] for y in range(col)]
+		self._map = [[0 for x in range(col)] for y in range(row)]
 
 		# set start and goal
 		self.start = start
