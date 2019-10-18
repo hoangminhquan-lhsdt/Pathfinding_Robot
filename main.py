@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import time
 from Map import Map
 import math
-import numpy as np
+import tkinter as tk
 
 
 class State:
@@ -135,8 +135,7 @@ def Greedy_BFS_Recursive(checked_List, start_node, current_node, goal_node, Map)
                 insert_node(neighbors, new_node)
         # Check neighbor list
         for i in neighbors:
-            path = Greedy_BFS_Recursive(
-                checked_List, start_node, i, goal_node, Map)
+            path = Greedy_BFS_Recursive(checked_List, start_node, i, goal_node, Map)
             if path != []:
                 return path
         return []
@@ -148,10 +147,9 @@ def Greedy_BFS_Search(Start, Goal, Map, checked_List=[]):
         checkedList.append(State(Goal, None, i, 0))
     start_state = State(Goal, None, Start, 0)
     goal_state = State(Goal, None, Goal, 0)
-    path = Greedy_BFS_Recursive(
-        checkedList, start_state, start_state, goal_state, Map)
+    path = Greedy_BFS_Recursive(checkedList, start_state, start_state, goal_state, Map)
     if path != []:
-        checked_List.append(path[len(path)-1])
+        checked_List.append(path[len(path) - 1])
         return path[len(path)-1]
     return []
 
@@ -244,8 +242,7 @@ def Dijkstra_Search(Start, Goal, Map, checked_List=[]):
     # Can not find any path
     return []
 
-
-if __name__ == '__main__':
+def Func(func):
     check_List = []
     # Map1 = Map(10, 20, (0, 0), (9, 19))
     Map1 = Map(5, 5, (1, 0), (4, 4))
@@ -254,12 +251,12 @@ if __name__ == '__main__':
         Map1.addObstacle([(i, 3)])
     # Map1.addObstacle([(4,0)])
     path = []
-    fig, ax = plt.subplots(figsize=(5, 10))
+    fig,ax = plt.subplots(figsize=(5, 5))
     fig.show()
     plt.imshow(Map1._map)
     fig.canvas.draw()
     time.sleep(0.1)
-    path = Greedy_BFS_Search(Map1.start, Map1.goal, Map1, check_List)
+    path = func(Map1.start, Map1.goal, Map1, check_List)
     while path != []:
         plt.imshow(Map1._map)
         Map1.addPath([path])
@@ -267,8 +264,25 @@ if __name__ == '__main__':
         fig.canvas.draw()
         i += 1
         if path != Map1.goal:
-            path = Greedy_BFS_Search(path, Map1.goal, Map1, check_List)
+            path = func(path, Map1.goal, Map1, check_List)
         else:
             break
     plt.imshow(Map1._map)
     plt.show()
+
+def Greedy():
+    Func(Greedy_BFS_Search)
+def Astar():
+    Func(AStar_Search)
+def Dijkstra():
+    Func(Dijkstra_Search)
+
+if __name__ == '__main__':
+    root=tk.Tk()
+    Greed = tk.Button(text="Greedy",command=Greedy)
+    Asta = tk.Button(text="Astar",command=Astar)
+    Dijkstr = tk.Button(text="Dijkstra",command=Dijkstra)
+    Greed.pack() 
+    Asta.pack()
+    Dijkstr.pack()
+    root.mainloop()
