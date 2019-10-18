@@ -22,8 +22,27 @@ class Map:
 			self.pathList.append(i)
 			self._map[i[0]][i[1]] = 5
 
-	def addPickup(self, pointsList):
-		pass
+	def dePath(self, pointsList):
+		for i in pointsList:
+			for index, item in enumerate(self.pathList):
+				if i == item:
+					self.pathList.pop(index)
+					self._map[i[0]][i[1]] = 0
+
+	def addPickupPoint(self, pointsList):
+		for i in pointsList:
+			self.pickupPoints.append(i)
+			self._map[i[0]][i[1]] = 6
+
+	def deStartAndPickup(self, pointsList):
+		for i in pointsList:
+			for index, item in enumerate(self.pickupPoints):
+				if i == item:
+					self.pickupPoints.pop(index)
+					self._map[i[0]][i[1]] = 0
+			if i == self.start:
+				self._map[self.start[0]][self.start[1]] = 0
+				
 
 	def printMap(self):
 		for i in self._map:

@@ -16,8 +16,7 @@ class State:
 
         # heuristic values
         self.g = g
-        self.h = abs(self.position[0] - goal[0]) + \
-            abs(self.position[1] - goal[1])
+        self.h = abs(self.position[0] - goal[0]) + abs(self.position[1] - goal[1])
         self.f = self.g + self.h
 
     def __eq__(self, other):
@@ -37,7 +36,7 @@ def insert_node(open_list, node):
             i -= 1
 
 
-def AStar_Search(Start, Goal, Map, checked_List=[]):
+def AStar_Search(Start, Goal, Map, checked_list):
     # Start node, Goal node
     start_state = State(Goal, None, Start, 0)
     goal_state = State(Goal, None, Goal, 0)
@@ -67,22 +66,22 @@ def AStar_Search(Start, Goal, Map, checked_List=[]):
                 while parent != start_state:
                     path.append(parent.position)
                     parent = parent.parent
-                return path[len(path) - 1]
+                return path[::-1]
 
         # Check if is neighbors of current node, append it to a list
         neighbors_index = [(1, 0), (0, 1), (-1, 0), (0, -1)]
         neighbors = []
         for i in neighbors_index:
-            pos = (current_node.position[0] + i[0],
-                   current_node.position[1] + i[1])
+            pos = (current_node.position[0] + i[0], current_node.position[1] + i[1])
             # Check out of Map
             if pos[0] < 0 or pos[0] > (len(Map._map) - 1) or pos[1] < 0 or pos[1] > (len(Map._map[0]) - 1):
                 continue
             # Check walkable
             if Map.isBlocked(pos[0], pos[1]):
                 continue
-            new_node = State(Map.goal, current_node, pos, current_node.g + 1)
-            neighbors.append(new_node)
+            if pos not in checked_list:
+                new_node = State(Goal, current_node, pos, current_node.g + 1)
+                neighbors.append(new_node)
 
         # Check neighbor list
         for child in neighbors:
@@ -125,12 +124,11 @@ def Greedy_BFS_Recursive(checked_List, start_node, current_node, goal_node, Map)
         neighbors_index = [(1, 0), (0, 1), (-1, 0), (0, -1)]
         neighbors = []
         for i in neighbors_index:
-            pos = (current_node.position[0] + i[0],
-                   current_node.position[1] + i[1])
+            pos = (current_node.position[0] + i[0], current_node.position[1] + i[1])
             # Check out of Map
             if pos[0] < 0 or pos[0] > (len(Map._map) - 1) or pos[1] < 0 or pos[1] > (len(Map._map[0]) - 1):
                 continue
-            new_node = State(Map.goal, current_node, pos, 0)
+            new_node = State(goal_node.position, current_node, pos, 0)
             if new_node not in checked_List:
                 insert_node(neighbors, new_node)
         # Check neighbor list
@@ -150,7 +148,7 @@ def Greedy_BFS_Search(Start, Goal, Map, checked_List=[]):
     path = Greedy_BFS_Recursive(checkedList, start_state, start_state, goal_state, Map)
     if path != []:
         checked_List.append(path[len(path) - 1])
-        return path[len(path)-1]
+        return path[::-1]
     return []
 
 
@@ -165,7 +163,7 @@ class Node_Dijkstra:
         return (self.position == other.position)
 
 
-def Dijkstra_Search(Start, Goal, Map, checked_List=[]):
+def Dijkstra_Search(Start, Goal, Map, checked_list):
     # Create Start and Goal Node
     start_node = Node_Dijkstra(None, Start, 0)
     goal_node = Node_Dijkstra(None, Goal)
@@ -207,23 +205,23 @@ def Dijkstra_Search(Start, Goal, Map, checked_List=[]):
                 while parent != start_node:
                     path.append(parent.position)
                     parent = parent.parent
-                return path[len(path) - 1]
+                return path[::-1]
 
         # Check if neighbors of current node, append it to a list
         neighbors_index = [(1, 0), (0, 1), (-1, 0), (0, -1)]
         neighbors = []
         for i in neighbors_index:
-            pos = (current_node.position[0] + i[0],
-                   current_node.position[1] + i[1])
+            pos = (current_node.position[0] + i[0], current_node.position[1] + i[1])
             # Check out of Map
             if pos[0] < 0 or pos[0] > (len(Map._map) - 1) or pos[1] < 0 or pos[1] > (len(Map._map[0]) - 1):
                 continue
             # Check walkable
             if Map.isBlocked(pos[0], pos[1]):
                 continue
-            dist = current_node.f + 1
-            new_node = Node_Dijkstra(current_node, pos, dist)
-            neighbors.append(new_node)
+            if pos not in checked_list:
+                dist = current_node.f + 1
+                new_node = Node_Dijkstra(current_node, pos, dist)
+                neighbors.append(new_node)
 
         # Check neighbor list
         for child in neighbors:
@@ -238,51 +236,73 @@ def Dijkstra_Search(Start, Goal, Map, checked_List=[]):
                     if item.f > child.f:
                         unexplored_list.pop(index)
                         insert_node(unexplored_list, child)
-
     # Can not find any path
     return []
 
 def Func(func):
-    check_List = []
-    # Map1 = Map(10, 20, (0, 0), (9, 19))
-    Map1 = Map(5, 5, (1, 0), (4, 4))
-    # Map1.addObstacle([(3,9)])
-    for i in range(1, 5):
-        Map1.addObstacle([(i, 3)])
-    # Map1.addObstacle([(4,0)])
+    Map1 = Map(10, 10, (0, 0), (9, 9))
+    for i in range(1, 9):
+        Map1.addObstacle([(i, i)])
+    Map1.addPickupPoint([(9, 8), (7, 9)])
+    start, goal = Map1.start, Map1.goal
+    pickUpPoint, Points = [], []
+    Points.append(start)
+    pickUpPoint = list.copy(Map1.pickupPoints)
+
+    while len(pickUpPoint) > 0:
+        index_min = 0
+        min = abs(pickUpPoint[0][0] - start[0]) + abs(pickUpPoint[0][1] - start[1])
+        for i in range(1, len(pickUpPoint)):
+            if (abs(pickUpPoint[i][0] - start[0]) + abs(pickUpPoint[i][1] - start[1])) < min:
+                min = abs(pickUpPoint[i][0] - start[0]) + abs(pickUpPoint[i][1] - start[1])
+                index_min = i
+        start = pickUpPoint.pop(index_min)
+        Points.append(start)
+
+    Points.append(goal)
     path = []
-    fig,ax = plt.subplots(figsize=(5, 5))
+    fig, ax = plt.subplots(figsize = (10, 5))
     fig.show()
+    fig.canvas.draw()
+    ax.clear()
     plt.imshow(Map1._map)
     fig.canvas.draw()
-    time.sleep(0.1)
-    path = func(Map1.start, Map1.goal, Map1, check_List)
-    while path != []:
-        plt.imshow(Map1._map)
-        Map1.addPath([path])
-        # ax.hist2d(x, y)
-        fig.canvas.draw()
-        i += 1
-        if path != Map1.goal:
-            path = func(path, Map1.goal, Map1, check_List)
-        else:
-            break
-    plt.imshow(Map1._map)
-    plt.show()
-
-def Greedy():
-    Func(Greedy_BFS_Search)
-def Astar():
-    Func(AStar_Search)
-def Dijkstra():
-    Func(Dijkstra_Search)
+    time.sleep(1)
+    for i in range(len(Points) - 1):
+        check_list = []
+        if Points[i + 1] != goal:
+            check_list.append(goal)
+        path = func(Points[i], Points[i+1], Map1, check_list)
+        for j in range(len(path)):
+            Map1.deStartAndPickup([Points[i]])
+            Map1.addPath([path[j]])
+            plt.imshow(Map1._map)
+            fig.canvas.draw()
+            ax.clear()
+            Map1.dePath([path[j]])
 
 if __name__ == '__main__':
     root=tk.Tk()
-    Greed = tk.Button(text="Greedy",command=Greedy)
-    Asta = tk.Button(text="Astar",command=Astar)
-    Dijkstr = tk.Button(text="Dijkstra",command=Dijkstra)
-    Greed.pack() 
-    Asta.pack()
-    Dijkstr.pack()
+    root.title("Menu")
+    root.configure(background = "blue")
+
+    def Greedy():
+        Func(Greedy_BFS_Search)
+    def Astar():
+        Func(AStar_Search)
+    def Dijkstra():
+        Func(Dijkstra_Search)
+
+    tk.Label(root, width = 20, text = "Choose an algorithm", bg = "yellow").grid(row = 0, column = 0)
+    tk.Button(root, width = 20, text="Greedy Search",command=Greedy) .grid(row = 1, column = 0)
+    tk.Button(root, width = 20, text="Astar Search",command=Astar) .grid(row = 2, column = 0)
+    tk.Button(root, width = 20, text="Dijkstra Search",command=Dijkstra) .grid(row = 3, column = 0)
+
+    def close_window():
+        root.destroy()
+        return 1
+
+    tk.Label(root, width = 20, text = "Click to exit", bg = "yellow").grid(row = 0, column = 1)
+    tk.Button(root, width = 5, text = "Exit", command = close_window, bg = "red").grid(row = 1, column = 1)
+
     root.mainloop()
