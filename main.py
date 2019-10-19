@@ -3,6 +3,7 @@ import time
 from Map import Map
 import math
 import tkinter as tk
+import os
 
 
 class State:
@@ -239,13 +240,56 @@ def Dijkstra_Search(Start, Goal, Map, checked_list):
     # Can not find any path
     return []
 
+def Read_Map():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Open and read file content by line
+    f = open(current_dir + '/map.txt', 'r')
+    file_content = f.readlines()
+    f.close()
+
+    # Get number of rows and columns
+    row, col = int(file_content[0].split(' ')[0]), int(file_content[0].split(' ')[1])
+    # Get start and goal positions
+    start = int(file_content[1].split(' ')[0]), int(file_content[1].split(' ')[1])
+    goal = int(file_content[2].split(' ')[0]), int(file_content[2].split(' ')[1])
+    # Initialize new map
+    new_map = Map(row, col, start, goal)
+
+    # Get list of obstacle points
+    obstacle_list = file_content[4].split(' ')
+    obstacle_points = []
+    i = 0
+    while i < obstacle_list.__len__()-1:
+        # Add each pair of x y values to list
+        obstacle_points.append((int(obstacle_list[i]), int(obstacle_list[i+1])))
+        i += 2
+    new_map.addObstacle(obstacle_points)
+
+    # Get list of pickup points
+    pickup_list = file_content[6].split(' ')
+    pickup_points = []
+    i = 0
+    while i < pickup_list.__len__()-1:
+        # Add each pair of x y values to list
+        pickup_points.append((int(pickup_list[i]), int(pickup_list[i+1])))
+        i += 2
+    new_map.addPickupPoint(pickup_points)
+    return new_map
+
 def Func(func, text):
-    Map1 = Map(20, 20, (1, 1), (18, 18))
-    for i in range(1, 19):
-        Map1.addObstacle([(i, 19 - i)])
-    Map1.addPickupPoint([(1, 5), (5, 3), (7, 3)])
-    start, goal = Map1.start, Map1.goal
+    # Map1 = Map(10, 10, (1, 1), (8, 8))
+    # # for i in range(2, 8):
+    # #     Map1.addObstacle([(i, i)])
+    # Map1.addPickupPoint([(2, 2), (4, 5), (7, 8)])
+    # start, goal = Map1.start, Map1.goal
+    # pickUpPoint, Points = [], []
+    # Points.append(start)
+    # pickUpPoint = list.copy(Map1.pickupPoints)
+
+    Map1 = Read_Map()
     pickUpPoint, Points = [], []
+    start, goal = Map1.start, Map1.goal
     Points.append(start)
     pickUpPoint = list.copy(Map1.pickupPoints)
 
@@ -263,11 +307,10 @@ def Func(func, text):
     path = []
     fig, ax = plt.subplots(figsize = (10, 5))
     fig.show()
-    fig.canvas.draw()
-    ax.clear()
     plt.imshow(Map1._map)
     fig.canvas.draw()
-    time.sleep(1)
+    fig.canvas.draw()
+    time.sleep(0.1)
     for i in range(len(Points) - 1):
         check_list = []
         if Points[i + 1] != goal:
@@ -281,6 +324,7 @@ def Func(func, text):
             Map1.addPath([path[j]])
             plt.imshow(Map1._map)
             fig.canvas.draw()
+            time.sleep(0.5)
             ax.clear()
             Map1.dePath([path[j]])
 

@@ -1,5 +1,5 @@
 class Map:
-	def __init__(self, row, col, start=(19,0), goal=(0,29)):
+	def __init__(self, row, col, start, goal):
 		# 0: norm, 1: obstacle, 2: start, 3: goal, 4: wall, 5: path, 6: pick up
 		# create 2d array
 		self._map = [[0 for x in range(col)] for y in range(row)]
