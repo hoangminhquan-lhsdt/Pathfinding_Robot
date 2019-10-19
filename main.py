@@ -37,6 +37,9 @@ def insert_node(open_list, node):
 
 
 def AStar_Search(Start, Goal, Map, checked_list):
+    if Map.isBlocked(Start[0], Start[1]):
+        return []
+
     # Start node, Goal node
     start_state = State(Goal, None, Start, 0)
     goal_state = State(Goal, None, Goal, 0)
@@ -73,9 +76,6 @@ def AStar_Search(Start, Goal, Map, checked_list):
         neighbors = []
         for i in neighbors_index:
             pos = (current_node.position[0] + i[0], current_node.position[1] + i[1])
-            # Check out of Map
-            if pos[0] < 0 or pos[0] > (len(Map._map) - 1) or pos[1] < 0 or pos[1] > (len(Map._map[0]) - 1):
-                continue
             # Check walkable
             if Map.isBlocked(pos[0], pos[1]):
                 continue
@@ -108,9 +108,11 @@ def AStar_Search(Start, Goal, Map, checked_list):
 
 
 def Greedy_BFS_Recursive(checked_List, start_node, current_node, goal_node, Map):
-    # Check if current Node is Goal
-    if Map.isBlocked(current_node.position[0], current_node.position[1]):
+    if Map.isBlocked(start_node.position[0], start_node.position[1]):
         return []
+    # Check if current Node is Goal
+    # if Map.isBlocked(current_node.position[0], current_node.position[1]):
+    #     return []
     elif current_node == goal_node:
         parent = current_node.parent
         path = [goal_node.position]
@@ -125,11 +127,9 @@ def Greedy_BFS_Recursive(checked_List, start_node, current_node, goal_node, Map)
         neighbors = []
         for i in neighbors_index:
             pos = (current_node.position[0] + i[0], current_node.position[1] + i[1])
-            # Check out of Map
-            if pos[0] < 0 or pos[0] > (len(Map._map) - 1) or pos[1] < 0 or pos[1] > (len(Map._map[0]) - 1):
-                continue
+            #     continue
             new_node = State(goal_node.position, current_node, pos, 0)
-            if new_node not in checked_List:
+            if new_node not in checked_List and (not Map.isBlocked(pos[0], pos[1])):
                 insert_node(neighbors, new_node)
         # Check neighbor list
         for i in neighbors:
@@ -164,6 +164,9 @@ class Node_Dijkstra:
 
 
 def Dijkstra_Search(Start, Goal, Map, checked_list):
+    if Map.isBlocked(Start[0], Start[1]):
+        return []
+    
     # Create Start and Goal Node
     start_node = Node_Dijkstra(None, Start, 0)
     goal_node = Node_Dijkstra(None, Goal)
@@ -212,9 +215,6 @@ def Dijkstra_Search(Start, Goal, Map, checked_list):
         neighbors = []
         for i in neighbors_index:
             pos = (current_node.position[0] + i[0], current_node.position[1] + i[1])
-            # Check out of Map
-            if pos[0] < 0 or pos[0] > (len(Map._map) - 1) or pos[1] < 0 or pos[1] > (len(Map._map[0]) - 1):
-                continue
             # Check walkable
             if Map.isBlocked(pos[0], pos[1]):
                 continue
@@ -239,11 +239,11 @@ def Dijkstra_Search(Start, Goal, Map, checked_list):
     # Can not find any path
     return []
 
-def Func(func):
-    Map1 = Map(10, 10, (0, 0), (9, 9))
-    for i in range(1, 9):
-        Map1.addObstacle([(i, i)])
-    Map1.addPickupPoint([(9, 8), (7, 9)])
+def Func(func, text):
+    Map1 = Map(20, 20, (1, 1), (18, 18))
+    for i in range(1, 19):
+        Map1.addObstacle([(i, 19 - i)])
+    Map1.addPickupPoint([(1, 5), (5, 3), (7, 3)])
     start, goal = Map1.start, Map1.goal
     pickUpPoint, Points = [], []
     Points.append(start)
@@ -273,6 +273,9 @@ def Func(func):
         if Points[i + 1] != goal:
             check_list.append(goal)
         path = func(Points[i], Points[i+1], Map1, check_list)
+        if path == []:
+            time.sleep(1)
+            break
         for j in range(len(path)):
             Map1.deStartAndPickup([Points[i]])
             Map1.addPath([path[j]])
@@ -282,27 +285,46 @@ def Func(func):
             Map1.dePath([path[j]])
 
 if __name__ == '__main__':
+    file_name = ""
     root=tk.Tk()
-    root.title("Menu")
-    root.configure(background = "blue")
+    root.title('Menu')
+    menu = tk.Menu(root)
+    root.config(background = 'blue', menu = menu)
 
-    def Greedy():
-        Func(Greedy_BFS_Search)
-    def Astar():
-        Func(AStar_Search)
-    def Dijkstra():
-        Func(Dijkstra_Search)
+    GreedyMenu = tk.Menu(menu)
+    def Greedy1():
+        Func(Greedy_BFS_Search, "map1.txt")
+    def Greedy2():
+        Func(Greedy_BFS_Search, "map2.txt")
+    def Greedy3():
+        Func(Greedy_BFS_Search, "map3.txt")
+    menu.add_cascade(label='Greedy', menu = GreedyMenu)
+    GreedyMenu.add_command(label='Map 1', command = Greedy1)
+    GreedyMenu.add_command(label='Map 2', command = Greedy2)
+    GreedyMenu.add_command(label='Map 3', command = Greedy3)
+    
+    def Astar1():
+        Func(AStar_Search, "map1.txt")
+    def Astar2():
+        Func(AStar_Search, "map2.txt")
+    def Astar3():
+        Func(AStar_Search, "map3.txt")
+    AstarMenu = tk.Menu(menu)
+    menu.add_cascade(label='Astar', menu = AstarMenu, )
+    AstarMenu.add_command(label='Map 1', command = Astar1)
+    AstarMenu.add_command(label='Map 2', command = Astar2)
+    AstarMenu.add_command(label='Map 3', command = Astar3)
 
-    tk.Label(root, width = 20, text = "Choose an algorithm", bg = "yellow").grid(row = 0, column = 0)
-    tk.Button(root, width = 20, text="Greedy Search",command=Greedy) .grid(row = 1, column = 0)
-    tk.Button(root, width = 20, text="Astar Search",command=Astar) .grid(row = 2, column = 0)
-    tk.Button(root, width = 20, text="Dijkstra Search",command=Dijkstra) .grid(row = 3, column = 0)
-
-    def close_window():
-        root.destroy()
-        return 1
-
-    tk.Label(root, width = 20, text = "Click to exit", bg = "yellow").grid(row = 0, column = 1)
-    tk.Button(root, width = 5, text = "Exit", command = close_window, bg = "red").grid(row = 1, column = 1)
+    def Dijkstra1():
+        Func(Dijkstra_Search, "map1.txt")
+    def Dijkstra2():
+        Func(Dijkstra_Search, "map2.txt")
+    def Dijkstra3():
+        Func(Dijkstra_Search, "map3.txt")
+    DijkstraMenu = tk.Menu(menu)
+    menu.add_cascade(label='Dijkstra', menu = DijkstraMenu)
+    DijkstraMenu.add_command(label='Map 1', command = Dijkstra1)
+    DijkstraMenu.add_command(label='Map 2', command = Dijkstra2)
+    DijkstraMenu.add_command(label='Map 3', command = Dijkstra3)
 
     root.mainloop()
