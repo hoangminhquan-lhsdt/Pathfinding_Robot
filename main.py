@@ -3,6 +3,7 @@ import time
 from Map import Map
 import math
 import tkinter as tk
+import os
 
 
 class State:
@@ -239,13 +240,57 @@ def Dijkstra_Search(Start, Goal, Map, checked_list):
     # Can not find any path
     return []
 
+def Read_Map():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Open and read file content by line
+    f = open(current_dir + '/map.txt', 'r')
+    file_content = f.readlines()
+    f.close()
+
+    # Get number of rows and columns
+    row, col = int(file_content[0].split(' ')[0]), int(file_content[0].split(' ')[1])
+    # Get start and goal positions
+    start = int(file_content[1].split(' ')[0]), int(file_content[1].split(' ')[1])
+    goal = int(file_content[2].split(' ')[0]), int(file_content[2].split(' ')[1])
+    # Initialize new map
+    new_map = Map(row, col, start, goal)
+
+    # Get list of obstacle points
+    obstacle_list = file_content[4].split(' ')
+    obstacle_points = []
+    i = 0
+    while i < obstacle_list.__len__()-1:
+        # Add each pair of x y values to list
+        obstacle_points.append([int(obstacle_list[i]), int(obstacle_list[i+1])])
+        i += 2
+    new_map.addObstacle(obstacle_points)
+
+    # Get list of pickup points
+    pickup_list = file_content[6].split(' ')
+    pickup_points = []
+    i = 0
+    while i < pickup_list.__len__()-1:
+        # Add each pair of x y values to list
+        pickup_points.append([int(pickup_list[i]), int(pickup_list[i+1])])
+        i += 2
+    new_map.addPickupPoint(pickup_points)
+
+    return new_map
+
 def Func(func):
-    Map1 = Map(10, 10, (0, 0), (9, 9))
-    for i in range(1, 9):
-        Map1.addObstacle([(i, i)])
-    Map1.addPickupPoint([(9, 8), (7, 9)])
-    start, goal = Map1.start, Map1.goal
+    # Map1 = Map(10, 10, (0, 0), (9, 9))
+    # for i in range(1, 9):
+    #     Map1.addObstacle([(i, i)])
+    # Map1.addPickupPoint([(9, 8), (7, 9)])
+    # start, goal = Map1.start, Map1.goal
+    # pickUpPoint, Points = [], []
+    # Points.append(start)
+    # pickUpPoint = list.copy(Map1.pickupPoints)
+
+    Map1 = Read_Map()
     pickUpPoint, Points = [], []
+    start, goal = Map1.start, Map1.goal
     Points.append(start)
     pickUpPoint = list.copy(Map1.pickupPoints)
 
