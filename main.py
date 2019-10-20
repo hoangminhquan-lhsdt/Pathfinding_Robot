@@ -13,7 +13,7 @@ class State:
         self.parent = parent
 
 		# current coordinates
-		self.position = position
+        self.position = position
 
         # heuristic values
         self.g = g
@@ -36,19 +36,11 @@ def insert_node(open_list, node):
             open_list[i-1] = temp
             i -= 1
 
-	def atDestination(self, goal: (int, int)):
-		if self.position != goal:
-			return False
-		return True
-'''
-def getChildren(pos: (int, int), Map: Map, parentG):
-	return [
-		State((pos[0]-1,pos[1]), Map.goal, parentG + 1),
-		State((pos[0]+1,pos[1]), Map.goal, parentG + 1),
-		State((pos[0],pos[1]-1), Map.goal, parentG + 1),
-		State((pos[0],pos[1]+1), Map.goal, parentG + 1)
-	]
-'''
+    def atDestination(self, goal: (int, int)):
+        if self.position != goal:
+            return False
+        return True
+
 def getChildren(pos: (int, int), Map: Map, parentG):
 	result = []
 	if pos[0] > 0 and pos[0] < Map._map.__len__()-1:
