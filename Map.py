@@ -1,3 +1,5 @@
+import math
+
 class Map:
 	def __init__(self, row, col, start, goal):
 		# 0: norm, 1: obstacle, 2: start, 3: goal, 4: wall, 5: path, 6: pick up
@@ -33,6 +35,29 @@ class Map:
 		for i in pointsList:
 			self.obstacleList.append(i)
 			self._map[i[0]][i[1]] = 1
+
+	def moveLeftObstacle(self):
+		A = []
+		for i in self.obstacleList:
+			self._map[i[0]][i[1]] = 0
+			self._map[i[0]][i[1] - 1] = 1
+			A.append(i)
+		while len(self.obstacleList) > 0:
+			self.obstacleList.pop()
+		for i in A:
+			self.addObstacle([(i[0], i[1] - 1)])
+
+	def moveRightObstacle(self):
+		A = []
+		for i in self.obstacleList:
+			self._map[i[0]][i[1]] = 0
+			self._map[i[0]][i[1] + 1] = 1
+			A.append(i)
+		while len(self.obstacleList) > 0:
+			self.obstacleList.pop()
+		for i in A:
+			self.addObstacle([(i[0], i[1]+ 1)])
+
 	def addPath(self, pointsList):
 		for i in pointsList:
 			self.pathList.append(i)

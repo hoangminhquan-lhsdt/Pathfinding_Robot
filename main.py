@@ -240,11 +240,11 @@ def Dijkstra_Search(Start, Goal, Map, checked_list):
     # Can not find any path
     return []
 
-def Read_Map():
+def Read_Map(file_name):
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
     # Open and read file content by line
-    f = open(current_dir + '/map.txt', 'r')
+    f = open(current_dir + "\\" + file_name, 'r')
     file_content = f.readlines()
     f.close()
 
@@ -277,17 +277,8 @@ def Read_Map():
     new_map.addPickupPoint(pickup_points)
     return new_map
 
-def Func(func, text):
-    # Map1 = Map(10, 10, (1, 1), (8, 8))
-    # # for i in range(2, 8):
-    # #     Map1.addObstacle([(i, i)])
-    # Map1.addPickupPoint([(2, 2), (4, 5), (7, 8)])
-    # start, goal = Map1.start, Map1.goal
-    # pickUpPoint, Points = [], []
-    # Points.append(start)
-    # pickUpPoint = list.copy(Map1.pickupPoints)
-
-    Map1 = Read_Map()
+def Func(func, file_name):
+    Map1 = Read_Map(file_name)
     pickUpPoint, Points = [], []
     start, goal = Map1.start, Map1.goal
     Points.append(start)
@@ -328,6 +319,46 @@ def Func(func, text):
             ax.clear()
             Map1.dePath([path[j]])
 
+def AstarMovingObject(func, file_name):
+    Map1 = Read_Map(file_name)
+    pickUpPoint, Points = [], []
+    start, goal = Map1.start, Map1.goal
+    Points.append(start)
+    pickUpPoint = list.copy(Map1.pickupPoints)
+
+    while len(pickUpPoint) > 0:
+        index_min = 0
+        min = abs(pickUpPoint[0][0] - start[0]) + abs(pickUpPoint[0][1] - start[1])
+        for i in range(1, len(pickUpPoint)):
+            if (abs(pickUpPoint[i][0] - start[0]) + abs(pickUpPoint[i][1] - start[1])) < min:
+                min = abs(pickUpPoint[i][0] - start[0]) + abs(pickUpPoint[i][1] - start[1])
+                index_min = i
+        start = pickUpPoint.pop(index_min)
+        Points.append(start)
+
+    Points.append(goal)
+    path = []
+    fig, ax = plt.subplots(figsize = (10, 5))
+    fig.show()
+    plt.imshow(Map1._map)
+    fig.canvas.draw()
+    time.sleep(0.5)
+    fig.canvas.draw()
+    time.sleep(0.1)
+    temp = True
+
+    def moveR_or_L(temp):
+        if temp:
+            Map1.moveRightObstacle()
+            temp = False
+        else:
+            Map1.moveLeftObstacle()
+            temp = True
+        return temp
+
+    for i in range(len(Points) - 1):
+        check_list = []
+
 if __name__ == '__main__':
     file_name = ""
     root=tk.Tk()
@@ -353,11 +384,14 @@ if __name__ == '__main__':
         Func(AStar_Search, "map2.txt")
     def Astar3():
         Func(AStar_Search, "map3.txt")
+    def Astar4():
+        AstarMovingObject(AStar_Search, "map1.txt")
     AstarMenu = tk.Menu(menu)
     menu.add_cascade(label='Astar', menu = AstarMenu, )
     AstarMenu.add_command(label='Map 1', command = Astar1)
     AstarMenu.add_command(label='Map 2', command = Astar2)
     AstarMenu.add_command(label='Map 3', command = Astar3)
+    AstarMenu.add_command(label='Moving Object', command = Astar4)
 
     def Dijkstra1():
         Func(Dijkstra_Search, "map1.txt")
