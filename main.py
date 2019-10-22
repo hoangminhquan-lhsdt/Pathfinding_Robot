@@ -4,7 +4,6 @@ from Map import Map
 import tkinter as tk
 import os
 
-
 class State:
 	def __init__(self, goal, parent=None, position=(int, int), g=100):
 		# init unopened state
@@ -22,7 +21,6 @@ class State:
 	def __eq__(self, other):
 		return (self.position == other.position)
 
-
 def insert_node(open_list, node):
 	if len(open_list) == 0:
 		open_list.append(node)
@@ -35,7 +33,6 @@ def insert_node(open_list, node):
 			open_list[i-1] = temp
 			i -= 1
 
-
 def getChildren(pos: (int, int), Map: Map, parentG):
 	result = []
 	if pos[0] > 0 and pos[0] < Map._map.__len__()-1:
@@ -45,7 +42,6 @@ def getChildren(pos: (int, int), Map: Map, parentG):
 		result.append(State((pos[0]+1, pos[1]), Map.goal, 0))
 	elif pos[0] == Map._map.__len__()-1:
 		result.append(State((pos[0]-1, pos[1]), Map.goal, 0))
-
 
 def AStar_Search(Start, Goal, Map, checked_list):
 	if Map.isBlocked(Start[0], Start[1]):
@@ -128,17 +124,9 @@ def AStar_Search(Start, Goal, Map, checked_list):
 	# can not find any path
 	return []
 
-
 def Greedy_BFS_Recursive(checked_List, start_node, current_node, goal_node, Map):
-	# if Map.isBlocked(start_node.position[0], start_node.position[1]):
-	# 	return []
-	# elif current_node == goal_node:
-	# 	parent = current_node.parent
-	# 	path = [goal_node.position]
-	# 	while parent != start_node:
-	# 		path.append(parent.position)
-	# 		parent = parent.parent
-	# 	return path
+	if Map.isBlocked(start_node.position[0], start_node.position[1]):
+		return []
 	if current_node == goal_node:
 		parent = current_node.parent
 		path = [goal_node.position]
@@ -177,7 +165,6 @@ def Greedy_BFS_Recursive(checked_List, start_node, current_node, goal_node, Map)
 				return path
 		return []
 
-
 def Greedy_BFS_Search(Start, Goal, Map, checked_List=[]):
 	# checkedList = []
 	# for i in checked_List:
@@ -191,7 +178,6 @@ def Greedy_BFS_Search(Start, Goal, Map, checked_List=[]):
 		return path[::-1]
 	return []
 
-
 class Node_Dijkstra:
 	def __init__(self, parent=None, position=(int, int), distance=1000):
 		#
@@ -201,7 +187,6 @@ class Node_Dijkstra:
 
 	def __eq__(self, other):
 		return (self.position == other.position)
-
 
 def Dijkstra_Search(Start, Goal, Map, checked_list):
 	if Map.isBlocked(Start[0], Start[1]):
@@ -401,7 +386,6 @@ def linePoints(start: (int, int), end: (int, int)):
 		else:
 			return lineHigh(start, end)
 
-
 def Func(func, file_name):
 	Map1 = Read_Map(file_name)
 	pickUpPoint, Points = [], []
@@ -456,8 +440,6 @@ def Func(func, file_name):
 	plt.imshow(Map1._map)
 	fig.canvas.draw()
 	time.sleep(0.1)
-
-
 
 def AstarMovingObject(func, file_name):
     Map1 = Read_Map(file_name)

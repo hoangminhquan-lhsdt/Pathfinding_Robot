@@ -30,6 +30,14 @@ class Map:
 		self.obstacleList = list()
 		self.pathList = list ()
 		self.pickupPoints = list()
+
+	def addStart(self, point):
+		self.start = point
+		self._map[point[0]][point[1]] = 2
+
+	def addGoal(self, point):
+		self.goal = point
+		self._map[point[0]][point[1]] = 3
     
 	def addObstacle(self, pointsList):
 		for i in pointsList:
