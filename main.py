@@ -307,6 +307,7 @@ def Read_Map(file_name):
 				obstacle_points += linePoints(obstacle_vertex[j],obstacle_vertex[j+1])
 	# Remove duplicates
 	obstacle_points = list(dict.fromkeys(obstacle_points))
+	new_map.addObstacle(obstacle_points)
 
 	return new_map
 
@@ -364,15 +365,6 @@ def linePoints(start: (int, int), end: (int, int)):
 
 
 def Func(func, text):
-	# Map1 = Map(10, 10, (1, 1), (8, 8))
-	# # for i in range(2, 8):
-	# #     Map1.addObstacle([(i, i)])
-	# Map1.addPickupPoint([(2, 2), (4, 5), (7, 8)])
-	# start, goal = Map1.start, Map1.goal
-	# pickUpPoint, Points = [], []
-	# Points.append(start)
-	# pickUpPoint = list.copy(Map1.pickupPoints)
-
 	Map1 = Read_Map(text)
 	pickUpPoint, Points = [], []
 	start, goal = Map1.start, Map1.goal
