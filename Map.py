@@ -48,23 +48,69 @@ class Map:
 		A = []
 		for i in self.obstacleList:
 			self._map[i[0]][i[1]] = 0
-			self._map[i[0]][i[1] - 1] = 1
+			if i[1] == 1:
+				self._map[i[0]][self.col - 2] = 1
+			else:
+				self._map[i[0]][i[1] - 1] = 1
 			A.append(i)
 		while len(self.obstacleList) > 0:
 			self.obstacleList.pop()
 		for i in A:
-			self.addObstacle([(i[0], i[1] - 1)])
+			if i[1] == 1:
+				self.addObstacle([(i[0], self.col - 2)])
+			else:
+				self.addObstacle([(i[0], i[1] - 1)])
 
 	def moveRightObstacle(self):
 		A = []
 		for i in self.obstacleList:
 			self._map[i[0]][i[1]] = 0
-			self._map[i[0]][i[1] + 1] = 1
+			if i[1] == self.col - 2:
+				self._map[i[0]][1] = 1
+			else:
+				self._map[i[0]][i[1] + 1] = 1
 			A.append(i)
 		while len(self.obstacleList) > 0:
 			self.obstacleList.pop()
 		for i in A:
-			self.addObstacle([(i[0], i[1]+ 1)])
+			if i[1] == self.col-2:
+				self.addObstacle([(i[0], 1)])
+			else:
+				self.addObstacle([(i[0], i[1] + 1)])
+
+	def moveUpObstacle(self):
+		A = []
+		for i in self.obstacleList:
+			self._map[i[0]][i[1]] = 0
+			if i[0] == 1:
+				self._map[self.row-2][i[1]] = 1
+			else:
+				self._map[i[0]-1][i[1]] = 1
+			A.append(i)
+		while len(self.obstacleList) > 0:
+			self.obstacleList.pop()
+		for i in A:
+			if i[0] == 1:
+				self.addObstacle([(self.row-2,i[1])])
+			else:
+				self.addObstacle([(i[0]-1, i[1])])
+
+	def moveDownObstacle(self):
+		A = []
+		for i in self.obstacleList:
+			self._map[i[0]][i[1]] = 0
+			if i[0] == self.row - 2:
+				self._map[1][i[1]] = 1
+			else:
+				self._map[i[0] + 1][i[1]] = 1
+			A.append(i)
+		while len(self.obstacleList) > 0:
+			self.obstacleList.pop()
+		for i in A:
+			if i[0] == self.row - 2:
+				self.addObstacle([(1,i[1])])
+			else:
+				self.addObstacle([(i[0] + 1, i[1])])		
 
 	def addPath(self, pointsList):
 		for i in pointsList:
