@@ -74,7 +74,7 @@ def AStar_Search(Start, Goal, Map, checked_list):
             # Back track to get path
             parent = current_node.parent
             if parent is None:
-                return []
+                return [], 0
             else:
                 path = []
                 path.append(goal_state.position)
@@ -132,7 +132,7 @@ def AStar_Search(Start, Goal, Map, checked_list):
     # can not find any path
     return [], 0
 
-def Greedy_BFS_Recursive(checked_List, start_node, current_node, goal_node, Map, cost):
+def Greedy_DFS_Recursive(checked_List, start_node, current_node, goal_node, Map, cost):
     if Map.isBlocked(start_node.position[0], start_node.position[1]):
         return [], 0
     if current_node == goal_node:
@@ -141,6 +141,24 @@ def Greedy_BFS_Recursive(checked_List, start_node, current_node, goal_node, Map,
         while parent != start_node:
             path.append(parent.position)
             parent = parent.parent
+        # Optimize
+        index=0
+        path.append(start_node.position)
+        while index < len(path) - 2:
+            if path[index + 1][0] != path[index][0] and path[index + 1][1] != path[index][1]:
+                if (path[index+1][0], path[index][1]) in path and (path[index][0], path[index+1][1]) in path:
+                    x,y=(path[index+1][0], path[index][1]),(path[index][0], path[index+1][1])
+                    j = index + 1
+                    while path[j]!=x and path[j]!=y:
+                        path.pop(j)
+            index+=1
+        cost = len(path) - 1
+        for i in range(len(path) - 1):
+            if path[i + 1][0] != path[i][0] and path[i + 1][1] != path[i][1]:
+                cost+=0.5
+        for i in range(len(path)):
+            if path[i] == start_node.position:
+                path.pop(i)
         return path, cost
     else:
         checked_List.append(current_node.position)
@@ -170,15 +188,15 @@ def Greedy_BFS_Recursive(checked_List, start_node, current_node, goal_node, Map,
                 insert_node(neighbors, new_node)
         # Check neighbor list
         for i in neighbors:
-            if abs(i.position[0] - current_node.position[0]) + abs(i.position[1] - current_node.position[1]) ==2:
-                path, distance = Greedy_BFS_Recursive(checked_List, start_node, i, goal_node, Map, cost + 1.5)
+            if abs(i.position[0] - current_node.position[0]) + abs(i.position[1] - current_node.position[1]) == 2:
+                path, distance = Greedy_DFS_Recursive(checked_List, start_node, i, goal_node, Map, cost + 1.5)
             else:
-                path, distance = Greedy_BFS_Recursive(checked_List, start_node, i, goal_node, Map, cost + 1)
+                path, distance = Greedy_DFS_Recursive(checked_List, start_node, i, goal_node, Map, cost + 1)
             if path != []:
                 return path, distance
         return [], 0
 
-def Greedy_BFS_Search(Start, Goal, Map, checked_List=[]):
+def Greedy_DFS_Search(Start, Goal, Map, checked_List=[]):
     if Map.isBlocked(Start[0], Start[1]):
         return [], 0
     if Map.isBlocked(Goal[0], Goal[1]):
@@ -187,7 +205,7 @@ def Greedy_BFS_Search(Start, Goal, Map, checked_List=[]):
     start_state = State(Goal, None, Start, 0)
     goal_state = State(Goal, None, Goal, 0)
     cost = 0
-    path, cost = Greedy_BFS_Recursive(check_list, start_state, start_state, goal_state, Map, cost)
+    path, cost = Greedy_DFS_Recursive(check_list, start_state, start_state, goal_state, Map, cost)
     return path[::-1], cost
 
 class Node_Dijkstra:
@@ -490,7 +508,7 @@ def funcMovingObject(func, file_name):
     time.sleep(0.1)
     check_list, path = [], []
     while not keyboard.is_pressed('esc'):
-        rand=random.randrange(4)
+        rand = random.randrange(4)
         Map1.dePath(path)
         if rand==0:
             Map1.moveLeftObstacle()
@@ -518,13 +536,13 @@ if __name__ == '__main__':
 
     GreedyMenu = tk.Menu(menu)
     def Greedy1():
-        Func(Greedy_BFS_Search, "map1.txt")
+        Func(Greedy_DFS_Search, "map1.txt")
     def Greedy2():
-        Func(Greedy_BFS_Search, "map2.txt")
+        Func(Greedy_DFS_Search, "map2.txt")
     def Greedy3():
-        Func(Greedy_BFS_Search, "map3.txt")
+        Func(Greedy_DFS_Search, "map3.txt")
     def Greedy4():
-        funcMovingObject(Greedy_BFS_Search, "map3.txt")
+        funcMovingObject(Greedy_DFS_Search, "map3.txt")
     menu.add_cascade(label='GREEDY', menu=GreedyMenu)
     GreedyMenu.add_command(label='Map 1', command=Greedy1)
     GreedyMenu.add_command(label='Map 2', command=Greedy2)
